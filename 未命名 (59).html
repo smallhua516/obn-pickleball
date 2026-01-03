@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>匹克球配色预览系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        /* 核心：页面背景改为纯白色 */
+        body {
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            /* 弹性布局用于容纳Logo和标题，实现水平居中对齐 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px; /* Logo与标题的间距 */
+        }
+
+        /* 核心：标题文字修改，保留增大后的字号样式 */
+        .page-title {
+            font-size: 38px; /* 增大后的醒目字号 */
+            color: #1e3a5f;
+            font-weight: 700;
+            margin-bottom: 0; /* 取消原有底部间距，配合弹性布局 */
+            letter-spacing: 2px; /* 增加字间距，更美观 */
+            line-height: 1; /* 确保垂直对齐效果 */
+        }
+
+        /* 核心：Logo高度改为55px */
+        .title-logo {
+            height: 55px; /* 按要求修改为55px，视觉更醒目 */
+            width: auto; /* 自动适应宽度，保持图片比例不变形 */
+            object-fit: contain; /* 防止图片变形 */
+            vertical-align: middle; /* 垂直居中对齐 */
+        }
+
+        /* 核心：调整grid布局为1:1，确保左右卡片宽度完全一致 */
+        .main-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 左右等宽，彻底解决宽度不一致问题 */
+            gap: 30px;
+        }
+
+        /* 预览卡片样式：保留原有美观度 */
+        .preview-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.09);
+            padding: 30px;
+            height: fit-content;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .preview-title {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-title::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 18px;
+            background: #2d8cf0;
+            border-radius: 2px;
+        }
+
+        /* 球场容器：保留原有样式 */
+        .court-container {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .court-bg {
+            width: auto;
+            height: 95%;
+            z-index: 1;
+            display: block;
+        }
+
+        .court-area-img {
+            position: absolute;
+            width: auto;
+            height: 95%;
+            z-index: 2;
+            opacity: 0.7;
+            mix-blend-mode: multiply;
+            display: block;
+        }
+
+        /* 三个区域初始颜色：独立配置 */
+        #bufferImg {
+            z-index: 2;
+            background-color: #6b7882;
+        }
+
+        #serveImg {
+            z-index: 3;
+            background-color: #8e77d6;
+        }
+
+        #nonVolleyImg {
+            z-index: 4;
+            background-color: #ff9eb1;
+        }
+
+        /* 核心：调整右侧卡片高度+增加顶部内边距，让内容下移 */
+        .control-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.09);
+            /* 1. 增加顶部内边距（上下不对称），让内容向下偏移 */
+            padding: 60px 25px 20px; /* 顶部60px（大幅增加），底部20px，左右25px */
+            /* 2. 调整高度：要么与左侧对齐（固定高度），要么自适应拉伸（min-height） */
+            min-height: 700px; /* 最小高度，确保与左侧预览卡高度匹配，不显得过短 */
+            height: fit-content; /* 同时保留自适应，内容过多时自动增高 */
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            /* 可选：若需要完全与左侧等高，可删除上面两行，使用下面这行（固定高度与左侧球场容器匹配） */
+            /* height: 660px; */ /* 左侧预览卡内边距30px+球场高度600px，对应右侧卡片高度 */
+        }
+
+        .control-title {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f4f8;
+        }
+
+        .control-title::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 18px;
+            background: #2d8cf0;
+            border-radius: 2px;
+        }
+
+        /* 独立区域颜色模块：缩小间距，更紧凑 */
+        .area-color-module {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f4f8;
+        }
+
+        .area-color-module:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        /* 区域设置标题：加大字号并加粗 */
+        .module-title {
+            font-size: 18px;
+            color: #4a5568;
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .module-title span {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        /* 非截击区标题标识色 */
+        #nonVolleyTitle span {
+            background-color: #ff9eb1;
+        }
+
+        /* 发球区标题标识色 */
+        #serveTitle span {
+            background-color: #8e77d6;
+        }
+
+        /* 缓冲区标题标识色 */
+        #bufferTitle span {
+            background-color: #6b7882;
+        }
+
+        /* 预选颜色方框：紧凑尺寸 */
+        .single-color-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            justify-content: flex-start;
+        }
+
+        .single-color-block {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .single-color-block:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .single-color-block.active {
+            border-color: #2d8cf0;
+            box-shadow: 0 0 0 2px rgba(45, 140, 240, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* 自由选色：长条预览形状 */
+        .single-custom-color {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .single-color-picker {
+            width: 120px;
+            height: 30px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            background: transparent;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .single-color-code {
+            font-size: 14px;
+            color: #2d3748;
+            font-weight: 600;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 响应式适配：移动端自动切换上下布局 */
+        @media (max-width: 992px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .court-container {
+                height: 450px;
+            }
+
+            /* 移动端标题字号适度缩小，Logo同步调整（保持醒目比例） */
+            .page-title {
+                font-size: 32px;
+            }
+            .title-logo {
+                height: 48px; /* 移动端同步放大，保持视觉协调 */
+            }
+
+            .single-color-block {
+                width: 28px;
+                height: 28px;
+            }
+
+            .single-color-picker {
+                width: 100px;
+                height: 28px;
+            }
+
+            /* 移动端调整右侧卡片顶部内边距，避免留白过多 */
+            .control-card {
+                padding: 40px 20px 15px;
+                min-height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .court-container {
+                height: 400px;
+            }
+
+            /* 手机端标题进一步缩小，Logo同步调整 */
+            .page-title {
+                font-size: 28px;
+            }
+            .title-logo {
+                height: 42px; /* 手机端适配，不溢出布局 */
+            }
+
+            .preview-card, .control-card {
+                padding: 15px 20px;
+            }
+
+            .single-color-picker {
+                width: 80px;
+                height: 26px;
+            }
+
+            .module-title {
+                font-size: 16px;
+            }
+
+            /* 移动端进一步调整右侧卡片样式 */
+            .control-card {
+                padding: 30px 15px 15px;
+                min-height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <!-- Logo高度已改为55px，放在标题左侧 -->
+        <img src="https://s41.ax1x.com/2026/01/03/pZUjfv6.png" alt="欧百娜Logo" class="title-logo" onerror="this.style.display='none';">
+        <!-- 核心：标题文字修改为「匹克球配色预览系统」 -->
+        <h1 class="page-title">匹克球配色预览系统</h1>
+    </div>
+
+    <div class="main-wrapper">
+        <!-- 左侧：球场效果预览区 -->
+        <div class="preview-card">
+            <h2 class="preview-title">球场效果预览</h2>
+            <div class="court-container">
+                <!-- 图片错误兜底，确保100%显示 -->
+                <img src="https://s41.ax1x.com/2026/01/03/pZUwrTI.png" alt="球场背景" class="court-bg" onerror="this.src='https://picsum.photos/800/500';">
+                <img src="https://s41.ax1x.com/2026/01/03/pZUyR10.png" alt="缓冲区" class="court-area-img" id="bufferImg" onerror="this.style.backgroundColor='#6b7882'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
+                <img src="https://s41.ax1x.com/2026/01/03/pZUy2pq.png" alt="发球区" class="court-area-img" id="serveImg" onerror="this.style.backgroundColor='#8e77d6'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
+                <img src="https://s41.ax1x.com/2026/01/03/pZUychn.png" alt="非截击区" class="court-area-img" id="nonVolleyImg" onerror="this.style.backgroundColor='#ff9eb1'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
+            </div>
+        </div>
+
+        <!-- 右侧：调整后的独立颜色操作控制面板 -->
+        <div class="control-card">
+            <h2 class="control-title">各区域独立改色控制面板</h2>
+
+            <!-- 1. 非截击区独立颜色配置 -->
+            <div class="area-color-module">
+                <h3 class="module-title" id="nonVolleyTitle">
+                    <span></span>
+                    非截击区颜色设置
+                </h3>
+                <div class="single-color-group" data-area-id="nonVolleyImg">
+                    <div class="single-color-block active" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                    <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                    <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                    <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                    <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                    <div class="single-color-block" style="background-color: #ffd666;" data-color="#ffd666"></div>
+                </div>
+                <div class="single-custom-color" data-area-id="nonVolleyImg">
+                    <input type="color" class="single-color-picker" data-area-id="nonVolleyImg" value="#ff9eb1">
+                    <span class="single-color-code" data-area-id="nonVolleyImg">#ff9eb1</span>
+                </div>
+            </div>
+
+            <!-- 2. 发球区独立颜色配置 -->
+            <div class="area-color-module">
+                <h3 class="module-title" id="serveTitle">
+                    <span></span>
+                    发球区颜色设置
+                </h3>
+                <div class="single-color-group" data-area-id="serveImg">
+                    <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                    <div class="single-color-block active" style="background-color: #8e77d6;" data-color="#8e77d6"></div>
+                    <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                    <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                    <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                    <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                </div>
+                <div class="single-custom-color" data-area-id="serveImg">
+                    <input type="color" class="single-color-picker" data-area-id="serveImg" value="#8e77d6">
+                    <span class="single-color-code" data-area-id="serveImg">#8e77d6</span>
+                </div>
+            </div>
+
+            <!-- 3. 缓冲区独立颜色配置 -->
+            <div class="area-color-module">
+                <h3 class="module-title" id="bufferTitle">
+                    <span></span>
+                    缓冲区颜色设置
+                </h3>
+                <div class="single-color-group" data-area-id="bufferImg">
+                    <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                    <div class="single-color-block" style="background-color: #8e77d6;" data-color="#8e77d6"></div>
+                    <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                    <div class="single-color-block active" style="background-color: #6b7882;" data-color="#6b7882"></div>
+                    <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                    <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                </div>
+                <div class="single-custom-color" data-area-id="bufferImg">
+                    <input type="color" class="single-color-picker" data-area-id="bufferImg" value="#6b7882">
+                    <span class="single-color-code" data-area-id="bufferImg">#6b7882</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 颜色补偿映射表：保留无色差功能
+        const colorCompensateMap = {
+            "#ff9eb1": "#ff9eb1",
+            "#8e77d6": "#8e77d6",
+            "#6b7882": "#6b7882",
+            "#2d8cf0": "#247edf",
+            "#ff7d00": "#ff7000",
+            "#f53f3f": "#f03030",
+            "#00c48c": "#00b880",
+            "#ffd666": "#ffcc55"
+        };
+
+        // 1. 独立预设颜色选择逻辑
+        const allColorBlocks = document.querySelectorAll('.single-color-block');
+        allColorBlocks.forEach(block => {
+            block.addEventListener('click', function() {
+                const areaId = this.parentElement.dataset.areaId;
+                const siblingBlocks = this.parentElement.querySelectorAll('.single-color-block');
+                siblingBlocks.forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+                const originalColor = this.dataset.color;
+                const compensateColor = colorCompensateMap[originalColor] || originalColor;
+                document.getElementById(areaId).style.backgroundColor = compensateColor;
+                const colorPicker = document.querySelector(`.single-color-picker[data-area-id="${areaId}"]`);
+                const colorCode = document.querySelector(`.single-color-code[data-area-id="${areaId}"]`);
+                if (colorPicker && colorCode) {
+                    colorPicker.value = originalColor;
+                    colorCode.textContent = originalColor;
+                }
+            });
+        });
+
+        // 2. 独立自定义颜色选择逻辑
+        const allColorPickers = document.querySelectorAll('.single-color-picker');
+        allColorPickers.forEach(picker => {
+            picker.addEventListener('input', function() {
+                const areaId = this.dataset.areaId;
+                const originalColor = this.value;
+                const compensateColor = colorCompensateMap[originalColor] || originalColor;
+                document.getElementById(areaId).style.backgroundColor = compensateColor;
+                const colorCode = document.querySelector(`.single-color-code[data-area-id="${areaId}"]`);
+                if (colorCode) {
+                    colorCode.textContent = originalColor;
+                }
+                const colorBlocks = document.querySelectorAll(`.single-color-group[data-area-id="${areaId}"] .single-color-block`);
+                colorBlocks.forEach(block => block.classList.remove('active'));
+            });
+        });
+
+        // 初始化：确保每个区域初始颜色正常显示
+        window.addEventListener('load', function() {
+            document.getElementById('bufferImg').style.backgroundColor = "#6b7882";
+            document.getElementById('serveImg').style.backgroundColor = "#8e77d6";
+            document.getElementById('nonVolleyImg').style.backgroundColor = "#ff9eb1";
+        });
+    </script>
+</body>
+</html>
