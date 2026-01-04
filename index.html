@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>匹克球配色预览系统</title>
+    <!-- 核心添加：配置浏览器标签图标（pick.png在根目录） -->
+    <link rel="icon" href="/pick.png" type="image/png">
+    <link rel="shortcut icon" href="/pick.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -12,7 +15,7 @@
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
         }
 
-        /* 核心：页面背景改为纯白色 */
+        /* 页面背景为纯白色 */
         body {
             background: #ffffff;
             min-height: 100vh;
@@ -24,41 +27,39 @@
             margin-bottom: 40px;
             padding-bottom: 20px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            /* 弹性布局用于容纳Logo和标题，实现水平居中对齐 */
+            /* 弹性布局容纳Logo和标题，水平垂直居中 */
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px; /* Logo与标题的间距 */
+            gap: 16px; /* Logo与标题间距 */
         }
 
-        /* 核心：标题文字修改，保留增大后的字号样式 */
         .page-title {
-            font-size: 38px; /* 增大后的醒目字号 */
+            font-size: 38px;
             color: #1e3a5f;
             font-weight: 700;
-            margin-bottom: 0; /* 取消原有底部间距，配合弹性布局 */
-            letter-spacing: 2px; /* 增加字间距，更美观 */
-            line-height: 1; /* 确保垂直对齐效果 */
+            margin-bottom: 0;
+            letter-spacing: 2px;
+            line-height: 1;
         }
 
-        /* 核心：Logo高度改为55px */
+        /* Logo高度设为55px */
         .title-logo {
-            height: 55px; /* 按要求修改为55px，视觉更醒目 */
-            width: auto; /* 自动适应宽度，保持图片比例不变形 */
-            object-fit: contain; /* 防止图片变形 */
-            vertical-align: middle; /* 垂直居中对齐 */
+            height: 55px;
+            width: auto;
+            object-fit: contain;
+            vertical-align: middle;
         }
 
-        /* 核心：调整grid布局为1:1，确保左右卡片宽度完全一致 */
+        /* 左右卡片等宽布局 */
         .main-wrapper {
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 左右等宽，彻底解决宽度不一致问题 */
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
 
-        /* 预览卡片样式：保留原有美观度 */
         .preview-card {
             background: #ffffff;
             border-radius: 16px;
@@ -87,7 +88,6 @@
             border-radius: 2px;
         }
 
-        /* 球场容器：保留原有样式 */
         .court-container {
             width: 100%;
             height: 600px;
@@ -118,7 +118,7 @@
             display: block;
         }
 
-        /* 三个区域初始颜色：独立配置 */
+        /* 三个区域初始颜色 */
         #bufferImg {
             z-index: 2;
             background-color: #6b7882;
@@ -134,19 +134,15 @@
             background-color: #ff9eb1;
         }
 
-        /* 核心：调整右侧卡片高度+增加顶部内边距，让内容下移 */
+        /* 右侧控制面板样式 */
         .control-card {
             background: #ffffff;
             border-radius: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.09);
-            /* 1. 增加顶部内边距（上下不对称），让内容向下偏移 */
-            padding: 60px 25px 20px; /* 顶部60px（大幅增加），底部20px，左右25px */
-            /* 2. 调整高度：要么与左侧对齐（固定高度），要么自适应拉伸（min-height） */
-            min-height: 700px; /* 最小高度，确保与左侧预览卡高度匹配，不显得过短 */
-            height: fit-content; /* 同时保留自适应，内容过多时自动增高 */
+            padding: 60px 25px 20px;
+            min-height: 700px;
+            height: fit-content;
             border: 1px solid rgba(0, 0, 0, 0.05);
-            /* 可选：若需要完全与左侧等高，可删除上面两行，使用下面这行（固定高度与左侧球场容器匹配） */
-            /* height: 660px; */ /* 左侧预览卡内边距30px+球场高度600px，对应右侧卡片高度 */
         }
 
         .control-title {
@@ -170,7 +166,6 @@
             border-radius: 2px;
         }
 
-        /* 独立区域颜色模块：缩小间距，更紧凑 */
         .area-color-module {
             margin-bottom: 25px;
             padding-bottom: 15px;
@@ -183,7 +178,6 @@
             border-bottom: none;
         }
 
-        /* 区域设置标题：加大字号并加粗 */
         .module-title {
             font-size: 18px;
             color: #4a5568;
@@ -201,22 +195,18 @@
             border-radius: 4px;
         }
 
-        /* 非截击区标题标识色 */
         #nonVolleyTitle span {
             background-color: #ff9eb1;
         }
 
-        /* 发球区标题标识色 */
         #serveTitle span {
             background-color: #8e77d6;
         }
 
-        /* 缓冲区标题标识色 */
         #bufferTitle span {
             background-color: #6b7882;
         }
 
-        /* 预选颜色方框：紧凑尺寸 */
         .single-color-group {
             display: flex;
             gap: 10px;
@@ -246,7 +236,6 @@
             transform: scale(1.1);
         }
 
-        /* 自由选色：长条预览形状 */
         .single-custom-color {
             display: flex;
             align-items: center;
@@ -281,7 +270,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
-        /* 响应式适配：移动端自动切换上下布局 */
+        /* 响应式适配 - 平板端 */
         @media (max-width: 992px) {
             .main-wrapper {
                 grid-template-columns: 1fr;
@@ -292,12 +281,11 @@
                 height: 450px;
             }
 
-            /* 移动端标题字号适度缩小，Logo同步调整（保持醒目比例） */
             .page-title {
                 font-size: 32px;
             }
             .title-logo {
-                height: 48px; /* 移动端同步放大，保持视觉协调 */
+                height: 48px;
             }
 
             .single-color-block {
@@ -310,24 +298,23 @@
                 height: 28px;
             }
 
-            /* 移动端调整右侧卡片顶部内边距，避免留白过多 */
             .control-card {
                 padding: 40px 20px 15px;
                 min-height: 500px;
             }
         }
 
+        /* 响应式适配 - 手机端 */
         @media (max-width: 768px) {
             .court-container {
                 height: 400px;
             }
 
-            /* 手机端标题进一步缩小，Logo同步调整 */
             .page-title {
                 font-size: 28px;
             }
             .title-logo {
-                height: 42px; /* 手机端适配，不溢出布局 */
+                height: 42px;
             }
 
             .preview-card, .control-card {
@@ -343,7 +330,6 @@
                 font-size: 16px;
             }
 
-            /* 移动端进一步调整右侧卡片样式 */
             .control-card {
                 padding: 30px 15px 15px;
                 min-height: 450px;
@@ -353,18 +339,15 @@
 </head>
 <body>
     <div class="page-header">
-        <!-- Logo高度已改为55px，放在标题左侧 -->
         <img src="https://s41.ax1x.com/2026/01/03/pZUjfv6.png" alt="欧百娜Logo" class="title-logo" onerror="this.style.display='none';">
-        <!-- 核心：标题文字修改为「匹克球配色预览系统」 -->
         <h1 class="page-title">匹克球配色预览系统</h1>
     </div>
 
     <div class="main-wrapper">
-        <!-- 左侧：球场效果预览区 -->
+        <!-- 左侧球场预览区 -->
         <div class="preview-card">
             <h2 class="preview-title">球场效果预览</h2>
             <div class="court-container">
-                <!-- 图片错误兜底，确保100%显示 -->
                 <img src="https://s41.ax1x.com/2026/01/03/pZUwrTI.png" alt="球场背景" class="court-bg" onerror="this.src='https://picsum.photos/800/500';">
                 <img src="https://s41.ax1x.com/2026/01/03/pZUyR10.png" alt="缓冲区" class="court-area-img" id="bufferImg" onerror="this.style.backgroundColor='#6b7882'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
                 <img src="https://s41.ax1x.com/2026/01/03/pZUy2pq.png" alt="发球区" class="court-area-img" id="serveImg" onerror="this.style.backgroundColor='#8e77d6'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
@@ -372,11 +355,11 @@
             </div>
         </div>
 
-        <!-- 右侧：调整后的独立颜色操作控制面板 -->
+        <!-- 右侧颜色控制面板 -->
         <div class="control-card">
             <h2 class="control-title">各区域独立改色控制面板</h2>
 
-            <!-- 1. 非截击区独立颜色配置 -->
+            <!-- 非截击区颜色配置 -->
             <div class="area-color-module">
                 <h3 class="module-title" id="nonVolleyTitle">
                     <span></span>
@@ -396,7 +379,7 @@
                 </div>
             </div>
 
-            <!-- 2. 发球区独立颜色配置 -->
+            <!-- 发球区颜色配置 -->
             <div class="area-color-module">
                 <h3 class="module-title" id="serveTitle">
                     <span></span>
@@ -416,7 +399,7 @@
                 </div>
             </div>
 
-            <!-- 3. 缓冲区独立颜色配置 -->
+            <!-- 缓冲区颜色配置 -->
             <div class="area-color-module">
                 <h3 class="module-title" id="bufferTitle">
                     <span></span>
@@ -439,7 +422,7 @@
     </div>
 
     <script>
-        // 颜色补偿映射表：保留无色差功能
+        // 颜色补偿映射表
         const colorCompensateMap = {
             "#ff9eb1": "#ff9eb1",
             "#8e77d6": "#8e77d6",
@@ -451,7 +434,7 @@
             "#ffd666": "#ffcc55"
         };
 
-        // 1. 独立预设颜色选择逻辑
+        // 预设颜色选择逻辑
         const allColorBlocks = document.querySelectorAll('.single-color-block');
         allColorBlocks.forEach(block => {
             block.addEventListener('click', function() {
@@ -471,7 +454,7 @@
             });
         });
 
-        // 2. 独立自定义颜色选择逻辑
+        // 自定义颜色选择逻辑
         const allColorPickers = document.querySelectorAll('.single-color-picker');
         allColorPickers.forEach(picker => {
             picker.addEventListener('input', function() {
@@ -488,7 +471,7 @@
             });
         });
 
-        // 初始化：确保每个区域初始颜色正常显示
+        // 初始化区域颜色
         window.addEventListener('load', function() {
             document.getElementById('bufferImg').style.backgroundColor = "#6b7882";
             document.getElementById('serveImg').style.backgroundColor = "#8e77d6";
