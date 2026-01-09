@@ -12,15 +12,10 @@
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
         }
 
-        /* 整个网页放大到120% */
         body {
             background: #ffffff;
             min-height: 100vh;
             padding: 40px 20px;
-            transform: scale(1.2);
-            transform-origin: top center;
-            width: 83.33%; /* 100% / 1.2 抵消scale导致的宽度溢出 */
-            margin: 0 auto;
         }
 
         .page-header {
@@ -95,7 +90,7 @@
             box-shadow: 0 4px 12px rgba(45, 140, 240, 0.2);
         }
 
-        /* 2. 主体内容区（核心：功能区固定280px，预览区占剩余宽度） */
+        /* 主体内容区 */
         .main-wrapper {
             max-width: 1400px;
             margin: 0 auto;
@@ -104,7 +99,7 @@
             gap: 30px;
         }
 
-        /* 3. 左侧预览区（宽度自动占满剩余空间，支持切换背景图） */
+        /* 左侧预览区 */
         .preview-card {
             background: #ffffff;
             border-radius: 16px;
@@ -147,7 +142,7 @@
             overflow: hidden;
         }
 
-        /* Canvas与背景图分层样式（统一尺寸和定位，确保对齐） */
+        /* Canvas与背景图分层样式 */
         #pickleLeftCanvas, #pickleRightCanvas, #pickleBufferCanvas,
         #badmintonLeftCanvas, #badmintonRightCanvas {
             position: absolute;
@@ -161,17 +156,12 @@
             z-index: 2;
             transform: none;
             object-fit: contain;
-            display: none; /* 默认隐藏所有Canvas，根据场地类型显示 */
+            display: none;
         }
 
-        /* 匹克球Canvas默认显示 */
         #pickleLeftCanvas { z-index: 2; display: block; }
         #pickleRightCanvas { z-index: 3; display: block; }
         #pickleBufferCanvas { z-index: 4; display: block; }
-
-        /* 羽毛球Canvas默认隐藏 */
-        #badmintonLeftCanvas { z-index: 2; }
-        #badmintonRightCanvas { z-index: 3; }
 
         .court-bg {
             position: absolute;
@@ -181,14 +171,14 @@
             bottom: 0;
             width: 100%;
             height: 100%;
-            background-image: url('https://s41.ax1x.com/2026/01/03/pZUwrTI.png'); /* 默认匹克球背景 */
+            background-image: url('https://s41.ax1x.com/2026/01/03/pZUwrTI.png');
             background-size: contain;
             background-position: center center;
             background-repeat: no-repeat;
             z-index: 1;
         }
 
-        /* 4. 右侧功能区（固定宽度280px，支持切换颜色配置模块） */
+        /* 右侧功能区 */
         .control-card {
             background: #ffffff;
             border-radius: 16px;
@@ -221,7 +211,7 @@
             border-radius: 2px;
         }
 
-        /* 颜色配置模块切换：匹克球模块默认显示，羽毛球模块默认隐藏 */
+        /* 颜色配置模块切换 */
         .pickle-color-modules { display: block; }
         .badminton-color-modules { display: none; }
 
@@ -264,7 +254,7 @@
         #badmintonLeftTitle span { background-color: #ff9eb1; }
         #badmintonRightTitle span { background-color: #8e77d6; }
 
-        /* 预设颜色块（6个刚好排满功能区宽度，无需换行） */
+        /* 预设颜色块 */
         .single-color-group {
             display: flex;
             gap: 10px;
@@ -288,6 +278,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
+        /* 关键修改：选中颜色块改为主题蓝色边框+发光效果 */
         .single-color-block.active {
             border-color: #2d8cf0;
             box-shadow: 0 0 0 2px rgba(45, 140, 240, 0.2);
@@ -329,7 +320,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
-        /* 5. 响应式适配（调整grid布局，保持功能区适配6个颜色块） */
+        /* 响应式适配 */
         @media (max-width: 992px) {
             .main-wrapper {
                 grid-template-columns: 1fr;
@@ -424,13 +415,12 @@
     </style>
 </head>
 <body>
-    <!-- 顶部标题区（新增场地类型切换） -->
+    <!-- 顶部标题区 -->
     <div class="page-header">
         <div class="title-top">
             <img src="https://s41.ax1x.com/2026/01/03/pZUjfv6.png" alt="欧百娜Logo" class="title-logo" onerror="this.style.display='none';">
             <h1 class="page-title">场地配色预览系统</h1>
         </div>
-        <!-- 场地类型切换按钮 -->
         <div class="court-type-switch">
             <button class="switch-btn active" data-type="pickle">
                 <img src="https://s41.ax1x.com/2026/01/08/pZwfVwq.png" alt="匹克球图标" class="btn-icon">
@@ -445,28 +435,23 @@
 
     <!-- 主体内容区 -->
     <div class="main-wrapper">
-        <!-- 左侧预览区（宽度自动占满剩余空间） -->
         <div class="preview-card">
             <h2 class="preview-title">球场效果预览</h2>
             <div class="court-container">
                 <div class="court-bg"></div>
-                <!-- 匹克球Canvas -->
                 <canvas id="pickleLeftCanvas" width="800" height="600"></canvas>
                 <canvas id="pickleRightCanvas" width="800" height="600"></canvas>
                 <canvas id="pickleBufferCanvas" width="800" height="600"></canvas>
-                <!-- 羽毛球Canvas -->
                 <canvas id="badmintonLeftCanvas" width="800" height="600"></canvas>
                 <canvas id="badmintonRightCanvas" width="800" height="600"></canvas>
             </div>
         </div>
 
-        <!-- 右侧功能区（固定宽度280px，支持切换颜色配置） -->
         <div class="control-card">
             <h2 class="control-title">各区域独立改色控制面板</h2>
 
-            <!-- 匹克球颜色配置模块（默认显示） -->
+            <!-- 匹克球颜色配置模块 -->
             <div class="pickle-color-modules">
-                <!-- 1. 非截击区颜色配置 -->
                 <div class="area-color-module">
                     <h3 class="module-title" id="noVolleyTitle">
                         <span></span>
@@ -486,7 +471,6 @@
                     </div>
                 </div>
 
-                <!-- 2. 发球区颜色配置 -->
                 <div class="area-color-module">
                     <h3 class="module-title" id="serveTitle">
                         <span></span>
@@ -506,7 +490,6 @@
                     </div>
                 </div>
 
-                <!-- 3. 缓冲区颜色配置 -->
                 <div class="area-color-module">
                     <h3 class="module-title" id="bufferTitle">
                         <span></span>
@@ -527,9 +510,8 @@
                 </div>
             </div>
 
-            <!-- 羽毛球颜色配置模块（默认隐藏） -->
+            <!-- 羽毛球颜色配置模块 -->
             <div class="badminton-color-modules">
-                <!-- 1. 左侧改色区 -->
                 <div class="area-color-module">
                     <h3 class="module-title" id="badmintonLeftTitle">
                         <span></span>
@@ -549,7 +531,6 @@
                     </div>
                 </div>
 
-                <!-- 2. 右侧改色区 -->
                 <div class="area-color-module">
                     <h3 class="module-title" id="badmintonRightTitle">
                         <span></span>
@@ -574,7 +555,6 @@
 
     <script>
         // 全局变量定义
-        // 匹克球Canvas和上下文
         const pickleLeftCanvas = document.getElementById('pickleLeftCanvas');
         const pickleRightCanvas = document.getElementById('pickleRightCanvas');
         const pickleBufferCanvas = document.getElementById('pickleBufferCanvas');
@@ -582,49 +562,57 @@
         const pickleRightCtx = pickleRightCanvas.getContext('2d');
         const pickleBufferCtx = pickleBufferCanvas.getContext('2d');
 
-        // 羽毛球Canvas和上下文
         const badmintonLeftCanvas = document.getElementById('badmintonLeftCanvas');
         const badmintonRightCanvas = document.getElementById('badmintonRightCanvas');
         const badmintonLeftCtx = badmintonLeftCanvas.getContext('2d');
         const badmintonRightCtx = badmintonRightCanvas.getContext('2d');
 
-        // 图片路径配置（更新羽毛球图片地址）
         const imgConfig = {
-            // 匹克球图片
             pickle: {
                 bg: 'https://s41.ax1x.com/2026/01/03/pZUwrTI.png',
-                left: 'https://s41.ax1x.com/2026/01/03/pZUwwOH.png', // 非截击区
-                right: 'https://s1.img-e.com/20260105/695bdb5c187df.png', // 发球区
-                buffer: 'https://s41.ax1x.com/2026/01/03/pZUwD0A.png' // 缓冲区
+                left: 'https://s41.ax1x.com/2026/01/03/pZUwwOH.png',
+                right: 'https://s1.img-e.com/20260105/695bdb5c187df.png',
+                buffer: 'https://s41.ax1x.com/2026/01/03/pZUwD0A.png'
             },
-            // 羽毛球图片（更新为新地址）
             badminton: {
                 bg: 'https://s41.ax1x.com/2026/01/08/pZwWass.png',
-                left: 'https://s41.ax1x.com/2026/01/08/pZwW3If.png', // 左侧改色区
-                right: 'https://s41.ax1x.com/2026/01/08/pZwfpY8.png' // 右侧改色区（更新后的链接）
+                left: 'https://s41.ax1x.com/2026/01/08/pZwW3If.png',
+                right: 'https://s41.ax1x.com/2026/01/08/pZwfpY8.png'
             }
         };
 
-        // 图片对象存储
         const imgObjects = {
             pickle: { left: new Image(), right: new Image(), buffer: new Image() },
             badminton: { left: new Image(), right: new Image() }
         };
 
-        // 背景图尺寸存储
         let bgImgWidth = 800;
         let bgImgHeight = 600;
-        // 当前激活的场地类型
         let currentCourtType = 'pickle';
 
-        // 初始化加载所有图片
         function initAllImages() {
-            // 加载匹克球图片
+            const pickleBgImg = new Image();
+            pickleBgImg.onload = function() {
+                bgImgWidth = this.width;
+                bgImgHeight = this.height;
+                [pickleLeftCanvas, pickleRightCanvas, pickleBufferCanvas,
+                 badmintonLeftCanvas, badmintonRightCanvas].forEach(canvas => {
+                    canvas.width = bgImgWidth;
+                    canvas.height = bgImgHeight;
+                });
+                loadPickleImages();
+            };
+            pickleBgImg.src = imgConfig.pickle.bg;
+
+            imgObjects.badminton.left.src = imgConfig.badminton.left;
+            imgObjects.badminton.right.src = imgConfig.badminton.right;
+        }
+
+        function loadPickleImages() {
             let pickleImgLoadCount = 0;
             function pickleImgLoaded() {
                 pickleImgLoadCount++;
                 if (pickleImgLoadCount === 3) {
-                    // 初始化匹克球渲染
                     renderArea('pickle', 'left', '#ff9eb1');
                     renderArea('pickle', 'right', '#8e77d6');
                     renderArea('pickle', 'buffer', '#848d94');
@@ -637,36 +625,10 @@
             imgObjects.pickle.right.src = imgConfig.pickle.right;
             imgObjects.pickle.buffer.onload = pickleImgLoaded;
             imgObjects.pickle.buffer.src = imgConfig.pickle.buffer;
-
-            // 加载羽毛球图片
-            imgObjects.badminton.left.onload = function() {
-                // 预加载，切换时直接渲染
-            };
-            imgObjects.badminton.left.src = imgConfig.badminton.left;
-            imgObjects.badminton.right.onload = function() {
-                // 预加载，切换时直接渲染
-            };
-            imgObjects.badminton.right.src = imgConfig.badminton.right;
-
-            // 加载匹克球背景图获取尺寸
-            const pickleBgImg = new Image();
-            pickleBgImg.onload = function() {
-                bgImgWidth = this.width;
-                bgImgHeight = this.height;
-                // 同步所有Canvas尺寸
-                [pickleLeftCanvas, pickleRightCanvas, pickleBufferCanvas,
-                 badmintonLeftCanvas, badmintonRightCanvas].forEach(canvas => {
-                    canvas.width = bgImgWidth;
-                    canvas.height = bgImgHeight;
-                });
-            };
-            pickleBgImg.src = imgConfig.pickle.bg;
         }
 
-        // 通用渲染函数
         function renderArea(courtType, areaType, targetColor) {
             let ctx, img;
-            // 根据场地类型和区域类型选择对应的Canvas和图片
             if (courtType === 'pickle') {
                 switch (areaType) {
                     case 'left': ctx = pickleLeftCtx; img = imgObjects.pickle.left; break;
@@ -684,86 +646,74 @@
                 return;
             }
 
-            // 清空画布并绘制图片
             ctx.clearRect(0, 0, bgImgWidth, bgImgHeight);
             const drawX = 0;
             const drawY = 0;
             const drawWidth = bgImgWidth;
             const drawHeight = bgImgHeight;
 
-            ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-            ctx.globalCompositeOperation = 'source-in';
-            ctx.fillStyle = targetColor;
-            ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
-            ctx.globalCompositeOperation = 'source-over';
+            if (img.complete) {
+                ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                ctx.globalCompositeOperation = 'source-in';
+                ctx.fillStyle = targetColor;
+                ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
+                ctx.globalCompositeOperation = 'source-over';
+            }
         }
 
-        // 更新颜色编码显示
         function updateColorCodeDisplay(areaKey, color) {
             const colorCodeEl = document.querySelector(`.single-color-code[data-area="${areaKey}"]`);
             if (colorCodeEl) colorCodeEl.textContent = color;
         }
 
-        // 场地类型切换逻辑
         function switchCourtType(type) {
             currentCourtType = type;
-            // 切换按钮激活状态
             document.querySelectorAll('.switch-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.type === type);
             });
 
-            // 切换背景图
             const courtBg = document.querySelector('.court-bg');
             courtBg.style.backgroundImage = `url('${imgConfig[type].bg}')`;
 
-            // 切换Canvas显示/隐藏
             if (type === 'pickle') {
-                // 显示匹克球Canvas，隐藏羽毛球Canvas
                 pickleLeftCanvas.style.display = 'block';
                 pickleRightCanvas.style.display = 'block';
                 pickleBufferCanvas.style.display = 'block';
                 badmintonLeftCanvas.style.display = 'none';
                 badmintonRightCanvas.style.display = 'none';
-                // 显示匹克球颜色模块，隐藏羽毛球模块
                 document.querySelector('.pickle-color-modules').style.display = 'block';
                 document.querySelector('.badminton-color-modules').style.display = 'none';
+                renderArea('pickle', 'left', document.querySelector('.single-color-picker[data-area="pickleLeft"]').value);
+                renderArea('pickle', 'right', document.querySelector('.single-color-picker[data-area="pickleRight"]').value);
+                renderArea('pickle', 'buffer', document.querySelector('.single-color-picker[data-area="pickleBuffer"]').value);
             } else if (type === 'badminton') {
-                // 隐藏匹克球Canvas，显示羽毛球Canvas
                 pickleLeftCanvas.style.display = 'none';
                 pickleRightCanvas.style.display = 'none';
                 pickleBufferCanvas.style.display = 'none';
                 badmintonLeftCanvas.style.display = 'block';
                 badmintonRightCanvas.style.display = 'block';
-                // 隐藏匹克球颜色模块，显示羽毛球模块
                 document.querySelector('.pickle-color-modules').style.display = 'none';
                 document.querySelector('.badminton-color-modules').style.display = 'block';
-                // 初始化渲染羽毛球区域
                 renderArea('badminton', 'left', document.querySelector('.single-color-picker[data-area="badmintonLeft"]').value);
                 renderArea('badminton', 'right', document.querySelector('.single-color-picker[data-area="badmintonRight"]').value);
             }
         }
 
-        // 绑定场地切换事件
         document.querySelectorAll('.switch-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 switchCourtType(this.dataset.type);
             });
         });
 
-        // 绑定预设颜色选择事件
         document.querySelectorAll('.single-color-block').forEach(block => {
             block.addEventListener('click', function() {
                 const areaKey = this.parentElement.dataset.area;
-                // 移除同组其他块的激活状态
                 this.parentElement.querySelectorAll('.single-color-block').forEach(item => item.classList.remove('active'));
                 this.classList.add('active');
                 const color = this.dataset.color;
-                // 更新颜色选择器值
                 document.querySelector(`.single-color-picker[data-area="${areaKey}"]`).value = color;
-                // 更新颜色编码显示
                 updateColorCodeDisplay(areaKey, color);
 
-                // 解析场地类型和区域类型并渲染
                 if (areaKey.startsWith('pickle')) {
                     const areaType = areaKey.replace('pickle', '').toLowerCase();
                     renderArea('pickle', areaType, color);
@@ -774,17 +724,13 @@
             });
         });
 
-        // 绑定自定义颜色选择事件
         document.querySelectorAll('.single-color-picker').forEach(picker => {
             picker.addEventListener('input', function() {
                 const areaKey = this.dataset.area;
                 const color = this.value;
-                // 更新颜色编码显示
                 updateColorCodeDisplay(areaKey, color);
-                // 移除同组预设颜色块的激活状态
                 document.querySelectorAll(`.single-color-group[data-area="${areaKey}"] .single-color-block`).forEach(block => block.classList.remove('active'));
 
-                // 解析场地类型和区域类型并渲染
                 if (areaKey.startsWith('pickle')) {
                     const areaType = areaKey.replace('pickle', '').toLowerCase();
                     renderArea('pickle', areaType, color);
@@ -795,21 +741,16 @@
             });
         });
 
-        // 窗口大小变化适配
         window.addEventListener('load', function() {
-            // 初始化图片加载
             initAllImages();
-
             const courtContainer = document.querySelector('.court-container');
             function resizeCanvas() {
-                // 仅调整显示尺寸，保持内部绘制尺寸不变
                 [pickleLeftCanvas, pickleRightCanvas, pickleBufferCanvas,
                  badmintonLeftCanvas, badmintonRightCanvas].forEach(canvas => {
                     canvas.style.width = '100%';
                     canvas.style.height = '100%';
                 });
             }
-
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
         });
