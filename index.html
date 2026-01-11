@@ -148,7 +148,9 @@
         /* Canvas与背景图分层样式 */
         #pickleLeftCanvas, #pickleRightCanvas, #pickleBufferCanvas,
         #badmintonLeftCanvas, #badmintonRightCanvas,
-        #pingpongFloorCanvas, #pingpongTableCanvas {
+        #pingpongFloorCanvas, #pingpongTableCanvas,
+        #basketballBufferCanvas, #basketballHomeCanvas, #basketballForbiddenCanvas,
+        #basketballThreePointCanvas, #basketballSemicircleCanvas, #basketballCenterCircleCanvas { /* 新增：三个篮球区域Canvas */
             position: absolute;
             top: 0;
             left: 0;
@@ -183,16 +185,41 @@
             z-index: 1;
         }
 
-        /* 右侧功能区 */
+        /* 右侧功能区 - 核心修改：添加滚动条并固定高度 */
         .control-card {
             background: #ffffff;
             border-radius: 16px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.09);
             padding: 60px 25px 20px;
-            min-height: 700px;
-            height: fit-content;
+            height: 700px; /* 固定高度，不再使用min-height */
+            max-height: 700px; /* 确保高度固定 */
+            overflow-y: auto; /* 垂直滚动 */
+            overflow-x: hidden; /* 隐藏水平滚动 */
             border: 1px solid rgba(0, 0, 0, 0.05);
             width: 280px;
+            /* 美化滚动条 */
+            scrollbar-width: thin;
+            scrollbar-color: #2d8cf0 #f8fafc;
+        }
+
+        /* 美化Chrome等webkit浏览器的滚动条 */
+        .control-card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .control-card::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+
+        .control-card::-webkit-scrollbar-thumb {
+            background: #2d8cf0;
+            border-radius: 3px;
+        }
+
+        .control-card::-webkit-scrollbar-thumb:hover {
+            background: #1c7ed6;
         }
 
         .control-title {
@@ -205,6 +232,11 @@
             gap: 10px;
             padding-bottom: 12px;
             border-bottom: 2px solid #f0f4f8;
+            position: sticky; /* 标题粘性定位，滚动时保持可见 */
+            top: 0;
+            background: #ffffff;
+            padding-top: 10px;
+            z-index: 10;
         }
 
         .control-title::before {
@@ -220,6 +252,7 @@
         .pickle-color-modules { display: block; }
         .badminton-color-modules { display: none; }
         .pingpong-color-modules { display: none; }
+        .basketball-color-modules { display: none; }
 
         /* 右侧颜色配置模块通用样式 */
         .area-color-module {
@@ -263,6 +296,14 @@
         /* 乒乓球各区域标题标识色 - 同步修改默认色 */
         #pingpongFloorTitle span { background-color: #d93636; }
         #pingpongTableTitle span { background-color: #2d8cf0; }
+
+        /* 篮球各区域标题标识色 */
+        #basketballBufferTitle span { background-color: #848d94; }
+        #basketballHomeTitle span { background-color: #ff9eb1; }
+        #basketballForbiddenTitle span { background-color: #f53f3f; }
+        #basketballThreePointTitle span { background-color: #722ed1; } /* 新增：三分线 */
+        #basketballSemicircleTitle span { background-color: #13c2c2; } /* 新增：半圆区 */
+        #basketballCenterCircleTitle span { background-color: #fa8c16; } /* 新增：中圈 */
 
         /* 预设颜色块 */
         .single-color-group {
@@ -444,6 +485,8 @@
                 width: 100%;
                 max-width: 280px;
                 margin: 0 auto;
+                height: 500px; /* 响应式调整高度 */
+                max-height: 500px;
             }
 
             .court-container {
@@ -465,11 +508,6 @@
             .single-color-picker {
                 width: 100px;
                 height: 28px;
-            }
-
-            .control-card {
-                padding: 40px 20px 15px;
-                min-height: 500px;
             }
 
             .switch-btn {
@@ -508,6 +546,12 @@
                 padding: 15px 20px;
             }
 
+            .control-card {
+                height: 450px; /* 响应式调整高度 */
+                max-height: 450px;
+                max-width: 260px;
+            }
+
             .single-color-picker {
                 width: 80px;
                 height: 26px;
@@ -515,12 +559,6 @@
 
             .module-title {
                 font-size: 16px;
-            }
-
-            .control-card {
-                padding: 30px 15px 15px;
-                min-height: 450px;
-                max-width: 260px;
             }
             
             .switch-btn {
@@ -539,7 +577,7 @@
             }
         }
 
-        /* 移动端适配三个切换按钮换行 */
+        /* 移动端适配四个切换按钮换行 */
         @media (max-width: 576px) {
             .court-type-switch {
                 gap: 10px;
@@ -580,6 +618,10 @@
                 <img src="https://s41.ax1x.com/2026/01/11/pZ0jXq0.png" alt="乒乓球图标" class="btn-icon">
                 乒乓球
             </button>
+            <button class="switch-btn" data-type="basketball">
+                <img src="https://youke3.picui.cn/s1/2026/01/11/69636a1551ca0.png" alt="篮球图标" class="btn-icon">
+                篮球
+            </button>
         </div>
     </div>
 
@@ -599,6 +641,14 @@
                 <!-- 乒乓球Canvas -->
                 <canvas id="pingpongFloorCanvas" width="800" height="600"></canvas>
                 <canvas id="pingpongTableCanvas" width="800" height="600"></canvas>
+                <!-- 篮球Canvas -->
+                <canvas id="basketballBufferCanvas" width="800" height="600"></canvas>
+                <canvas id="basketballHomeCanvas" width="800" height="600"></canvas>
+                <canvas id="basketballForbiddenCanvas" width="800" height="600"></canvas>
+                <!-- 新增：三个篮球区域Canvas -->
+                <canvas id="basketballThreePointCanvas" width="800" height="600"></canvas>
+                <canvas id="basketballSemicircleCanvas" width="800" height="600"></canvas>
+                <canvas id="basketballCenterCircleCanvas" width="800" height="600"></canvas>
             </div>
         </div>
 
@@ -750,6 +800,126 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 篮球颜色配置模块 -->
+            <div class="basketball-color-modules">
+                <div class="area-color-module">
+                    <h3 class="module-title" id="basketballBufferTitle">
+                        <span></span>
+                        缓冲区颜色设置
+                    </h3>
+                    <div class="single-color-group" data-area="basketballBuffer">
+                        <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                        <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                        <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                        <div class="single-color-block active" style="background-color: #848d94;" data-color="#848d94"></div>
+                        <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                        <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                    </div>
+                    <div class="single-custom-color" data-area="basketballBuffer">
+                        <input type="color" class="single-color-picker" data-area="basketballBuffer" value="#848d94">
+                        <span class="single-color-code" data-area="basketballBuffer">#848d94</span>
+                    </div>
+                </div>
+
+                <div class="area-color-module">
+                    <h3 class="module-title" id="basketballHomeTitle">
+                        <span></span>
+                        主场区颜色设置
+                    </h3>
+                    <div class="single-color-group" data-area="basketballHome">
+                        <div class="single-color-block active" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                        <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                        <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                        <div class="single-color-block" style="background-color: #848d94;" data-color="#848d94"></div>
+                        <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                        <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                    </div>
+                    <div class="single-custom-color" data-area="basketballHome">
+                        <input type="color" class="single-color-picker" data-area="basketballHome" value="#ff9eb1">
+                        <span class="single-color-code" data-area="basketballHome">#ff9eb1</span>
+                    </div>
+                </div>
+
+                <div class="area-color-module">
+                    <h3 class="module-title" id="basketballForbiddenTitle">
+                        <span></span>
+                        禁区颜色设置
+                    </h3>
+                    <div class="single-color-group" data-area="basketballForbidden">
+                        <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                        <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                        <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                        <div class="single-color-block" style="background-color: #848d94;" data-color="#848d94"></div>
+                        <div class="single-color-block active" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                        <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                    </div>
+                    <div class="single-custom-color" data-area="basketballForbidden">
+                        <input type="color" class="single-color-picker" data-area="basketballForbidden" value="#f53f3f">
+                        <span class="single-color-code" data-area="basketballForbidden">#f53f3f</span>
+                    </div>
+                </div>
+
+                <!-- 新增：三分线颜色配置模块 -->
+                <div class="area-color-module">
+                    <h3 class="module-title" id="basketballThreePointTitle">
+                        <span></span>
+                        三分线颜色设置
+                    </h3>
+                    <div class="single-color-group" data-area="basketballThreePoint">
+                        <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                        <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                        <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                        <div class="single-color-block" style="background-color: #848d94;" data-color="#848d94"></div>
+                        <div class="single-color-block active" style="background-color: #722ed1;" data-color="#722ed1"></div>
+                        <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                    </div>
+                    <div class="single-custom-color" data-area="basketballThreePoint">
+                        <input type="color" class="single-color-picker" data-area="basketballThreePoint" value="#722ed1">
+                        <span class="single-color-code" data-area="basketballThreePoint">#722ed1</span>
+                    </div>
+                </div>
+
+                <!-- 新增：半圆区颜色配置模块 -->
+                <div class="area-color-module">
+                    <h3 class="module-title" id="basketballSemicircleTitle">
+                        <span></span>
+                        半圆区颜色设置
+                    </h3>
+                    <div class="single-color-group" data-area="basketballSemicircle">
+                        <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                        <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                        <div class="single-color-block" style="background-color: #ff7d00;" data-color="#ff7d00"></div>
+                        <div class="single-color-block" style="background-color: #848d94;" data-color="#848d94"></div>
+                        <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                        <div class="single-color-block active" style="background-color: #13c2c2;" data-color="#13c2c2"></div>
+                    </div>
+                    <div class="single-custom-color" data-area="basketballSemicircle">
+                        <input type="color" class="single-color-picker" data-area="basketballSemicircle" value="#13c2c2">
+                        <span class="single-color-code" data-area="basketballSemicircle">#13c2c2</span>
+                    </div>
+                </div>
+
+                <!-- 新增：中圈颜色配置模块 -->
+                <div class="area-color-module">
+                    <h3 class="module-title" id="basketballCenterCircleTitle">
+                        <span></span>
+                        中圈颜色设置
+                    </h3>
+                    <div class="single-color-group" data-area="basketballCenterCircle">
+                        <div class="single-color-block" style="background-color: #ff9eb1;" data-color="#ff9eb1"></div>
+                        <div class="single-color-block" style="background-color: #2d8cf0;" data-color="#2d8cf0"></div>
+                        <div class="single-color-block active" style="background-color: #fa8c16;" data-color="#fa8c16"></div>
+                        <div class="single-color-block" style="background-color: #848d94;" data-color="#848d94"></div>
+                        <div class="single-color-block" style="background-color: #f53f3f;" data-color="#f53f3f"></div>
+                        <div class="single-color-block" style="background-color: #00c48c;" data-color="#00c48c"></div>
+                    </div>
+                    <div class="single-custom-color" data-area="basketballCenterCircle">
+                        <input type="color" class="single-color-picker" data-area="basketballCenterCircle" value="#fa8c16">
+                        <span class="single-color-code" data-area="basketballCenterCircle">#fa8c16</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -794,6 +964,22 @@
         const pingpongFloorCtx = pingpongFloorCanvas.getContext('2d');
         const pingpongTableCtx = pingpongTableCanvas.getContext('2d');
 
+        // 篮球Canvas元素
+        const basketballBufferCanvas = document.getElementById('basketballBufferCanvas');
+        const basketballHomeCanvas = document.getElementById('basketballHomeCanvas');
+        const basketballForbiddenCanvas = document.getElementById('basketballForbiddenCanvas');
+        const basketballBufferCtx = basketballBufferCanvas.getContext('2d');
+        const basketballHomeCtx = basketballHomeCanvas.getContext('2d');
+        const basketballForbiddenCtx = basketballForbiddenCanvas.getContext('2d');
+        
+        // 新增：三个篮球区域Canvas元素
+        const basketballThreePointCanvas = document.getElementById('basketballThreePointCanvas');
+        const basketballSemicircleCanvas = document.getElementById('basketballSemicircleCanvas');
+        const basketballCenterCircleCanvas = document.getElementById('basketballCenterCircleCanvas');
+        const basketballThreePointCtx = basketballThreePointCanvas.getContext('2d');
+        const basketballSemicircleCtx = basketballSemicircleCanvas.getContext('2d');
+        const basketballCenterCircleCtx = basketballCenterCircleCanvas.getContext('2d');
+
         // 图片上传相关变量
         const imageUpload = document.getElementById('imageUpload');
         const previewImage = document.getElementById('previewImage');
@@ -818,6 +1004,15 @@
                 bg: 'https://s41.ax1x.com/2026/01/11/pZ0jzIU.png',
                 floor: 'https://s41.ax1x.com/2026/01/11/pZ0jxaT.png',
                 table: 'https://s41.ax1x.com/2026/01/11/pZ0jvZV.png'
+            },
+            basketball: {
+                bg: 'https://youke3.picui.cn/s1/2026/01/11/69636ce939c99.png',
+                buffer: 'https://s41.ax1x.com/2026/01/11/pZ0zxdP.png',
+                home: 'https://youke3.picui.cn/s1/2026/01/11/69636ce935367.png',
+                forbidden: 'https://s41.ax1x.com/2026/01/11/pZ0zOsA.png',
+                threePoint: 'https://s41.ax1x.com/2026/01/11/pZ0zLMd.png', // 新增：三分线
+                semicircle: 'https://s41.ax1x.com/2026/01/11/pZ0zbxH.png', // 新增：半圆区
+                centerCircle: 'https://s41.ax1x.com/2026/01/11/pZ0zXqI.png' // 新增：中圈
             }
         };
 
@@ -825,7 +1020,15 @@
         const imgObjects = {
             pickle: { left: new Image(), right: new Image(), buffer: new Image() },
             badminton: { left: new Image(), right: new Image() },
-            pingpong: { floor: new Image(), table: new Image() }
+            pingpong: { floor: new Image(), table: new Image() },
+            basketball: { 
+                buffer: new Image(), 
+                home: new Image(), 
+                forbidden: new Image(),
+                threePoint: new Image(), // 新增：三分线
+                semicircle: new Image(), // 新增：半圆区
+                centerCircle: new Image() // 新增：中圈
+            }
         };
 
         let bgImgWidth = 800;
@@ -839,12 +1042,15 @@
                 bgImgHeight = this.height;
                 [pickleLeftCanvas, pickleRightCanvas, pickleBufferCanvas,
                  badmintonLeftCanvas, badmintonRightCanvas,
-                 pingpongFloorCanvas, pingpongTableCanvas].forEach(canvas => {
+                 pingpongFloorCanvas, pingpongTableCanvas,
+                 basketballBufferCanvas, basketballHomeCanvas, basketballForbiddenCanvas,
+                 basketballThreePointCanvas, basketballSemicircleCanvas, basketballCenterCircleCanvas].forEach(canvas => { // 新增：三个篮球Canvas
                     canvas.width = bgImgWidth;
                     canvas.height = bgImgHeight;
                 });
                 loadPickleImages();
                 loadPingpongImages();
+                loadBasketballImages();
             };
             pickleBgImg.src = imgConfig.pickle.bg;
 
@@ -880,6 +1086,38 @@
             imgObjects.pingpong.table.src = imgConfig.pingpong.table;
         }
 
+        // 加载篮球图片
+        function loadBasketballImages() {
+            let basketballImgLoadCount = 0;
+            function basketballImgLoaded() {
+                basketballImgLoadCount++;
+                if (basketballImgLoadCount === 6) { // 修改：从3改为6，包含新增的三个区域
+                    // 初始化篮球各区域颜色
+                    renderArea('basketball', 'buffer', '#848d94');
+                    renderArea('basketball', 'home', '#ff9eb1');
+                    renderArea('basketball', 'forbidden', '#f53f3f');
+                    // 新增：初始化三个区域的默认颜色
+                    renderArea('basketball', 'threePoint', '#722ed1');
+                    renderArea('basketball', 'semicircle', '#13c2c2');
+                    renderArea('basketball', 'centerCircle', '#fa8c16');
+                }
+            }
+
+            imgObjects.basketball.buffer.onload = basketballImgLoaded;
+            imgObjects.basketball.buffer.src = imgConfig.basketball.buffer;
+            imgObjects.basketball.home.onload = basketballImgLoaded;
+            imgObjects.basketball.home.src = imgConfig.basketball.home;
+            imgObjects.basketball.forbidden.onload = basketballImgLoaded;
+            imgObjects.basketball.forbidden.src = imgConfig.basketball.forbidden;
+            // 新增：加载三个区域的图片
+            imgObjects.basketball.threePoint.onload = basketballImgLoaded;
+            imgObjects.basketball.threePoint.src = imgConfig.basketball.threePoint;
+            imgObjects.basketball.semicircle.onload = basketballImgLoaded;
+            imgObjects.basketball.semicircle.src = imgConfig.basketball.semicircle;
+            imgObjects.basketball.centerCircle.onload = basketballImgLoaded;
+            imgObjects.basketball.centerCircle.src = imgConfig.basketball.centerCircle;
+        }
+
         // 通用渲染函数
         function renderArea(courtType, areaType, targetColor) {
             let ctx, img;
@@ -900,6 +1138,16 @@
                 switch (areaType) {
                     case 'floor': ctx = pingpongFloorCtx; img = imgObjects.pingpong.floor; break;
                     case 'table': ctx = pingpongTableCtx; img = imgObjects.pingpong.table; break;
+                    default: return;
+                }
+            } else if (courtType === 'basketball') {
+                switch (areaType) {
+                    case 'buffer': ctx = basketballBufferCtx; img = imgObjects.basketball.buffer; break;
+                    case 'home': ctx = basketballHomeCtx; img = imgObjects.basketball.home; break;
+                    case 'forbidden': ctx = basketballForbiddenCtx; img = imgObjects.basketball.forbidden; break;
+                    case 'threePoint': ctx = basketballThreePointCtx; img = imgObjects.basketball.threePoint; break; // 新增：三分线
+                    case 'semicircle': ctx = basketballSemicircleCtx; img = imgObjects.basketball.semicircle; break; // 新增：半圆区
+                    case 'centerCircle': ctx = basketballCenterCircleCtx; img = imgObjects.basketball.centerCircle; break; // 新增：中圈
                     default: return;
                 }
             } else {
@@ -941,7 +1189,9 @@
             // 隐藏所有Canvas
             [pickleLeftCanvas, pickleRightCanvas, pickleBufferCanvas,
              badmintonLeftCanvas, badmintonRightCanvas,
-             pingpongFloorCanvas, pingpongTableCanvas].forEach(canvas => {
+             pingpongFloorCanvas, pingpongTableCanvas,
+             basketballBufferCanvas, basketballHomeCanvas, basketballForbiddenCanvas,
+             basketballThreePointCanvas, basketballSemicircleCanvas, basketballCenterCircleCanvas].forEach(canvas => { // 新增：三个篮球Canvas
                 canvas.style.display = 'none';
             });
 
@@ -949,6 +1199,7 @@
             document.querySelector('.pickle-color-modules').style.display = 'none';
             document.querySelector('.badminton-color-modules').style.display = 'none';
             document.querySelector('.pingpong-color-modules').style.display = 'none';
+            document.querySelector('.basketball-color-modules').style.display = 'none';
 
             // 根据类型显示对应Canvas和模块
             if (type === 'pickle') {
@@ -980,6 +1231,28 @@
                 renderArea('pingpong', 'table', document.querySelector('.single-color-picker[data-area="pingpongTable"]').value);
                 // 更新当前激活区域
                 currentActiveArea = 'pingpongFloor';
+            } else if (type === 'basketball') {
+                // 显示篮球所有Canvas
+                basketballBufferCanvas.style.display = 'block';
+                basketballHomeCanvas.style.display = 'block';
+                basketballForbiddenCanvas.style.display = 'block';
+                // 新增：显示三个篮球区域Canvas
+                basketballThreePointCanvas.style.display = 'block';
+                basketballSemicircleCanvas.style.display = 'block';
+                basketballCenterCircleCanvas.style.display = 'block';
+                
+                document.querySelector('.basketball-color-modules').style.display = 'block';
+                // 渲染篮球区域
+                renderArea('basketball', 'buffer', document.querySelector('.single-color-picker[data-area="basketballBuffer"]').value);
+                renderArea('basketball', 'home', document.querySelector('.single-color-picker[data-area="basketballHome"]').value);
+                renderArea('basketball', 'forbidden', document.querySelector('.single-color-picker[data-area="basketballForbidden"]').value);
+                // 新增：渲染三个篮球区域
+                renderArea('basketball', 'threePoint', document.querySelector('.single-color-picker[data-area="basketballThreePoint"]').value);
+                renderArea('basketball', 'semicircle', document.querySelector('.single-color-picker[data-area="basketballSemicircle"]').value);
+                renderArea('basketball', 'centerCircle', document.querySelector('.single-color-picker[data-area="basketballCenterCircle"]').value);
+                
+                // 更新当前激活区域
+                currentActiveArea = 'basketballBuffer';
             }
         }
 
@@ -1003,16 +1276,30 @@
                 // 更新当前激活区域
                 currentActiveArea = areaKey;
 
-                // 解析场地类型和区域类型并渲染
+                // 解析场地类型和区域类型并渲染 - 修复核心逻辑
+                let courtType, areaType;
                 if (areaKey.startsWith('pickle')) {
-                    const areaType = areaKey.replace('pickle', '').toLowerCase();
-                    renderArea('pickle', areaType, color);
+                    courtType = 'pickle';
+                    areaType = areaKey.replace('pickle', '').toLowerCase();
                 } else if (areaKey.startsWith('badminton')) {
-                    const areaType = areaKey.replace('badminton', '').toLowerCase();
-                    renderArea('badminton', areaType, color);
+                    courtType = 'badminton';
+                    areaType = areaKey.replace('badminton', '').toLowerCase();
                 } else if (areaKey.startsWith('pingpong')) {
-                    const areaType = areaKey.replace('pingpong', '').toLowerCase();
-                    renderArea('pingpong', areaType, color);
+                    courtType = 'pingpong';
+                    areaType = areaKey.replace('pingpong', '').toLowerCase();
+                } else if (areaKey.startsWith('basketball')) {
+                    courtType = 'basketball';
+                    // 修复：处理大小写和命名匹配问题
+                    areaType = areaKey.replace('basketball', '');
+                    // 将首字母小写，处理ThreePoint -> threePoint的情况
+                    if (areaType.length > 0) {
+                        areaType = areaType.charAt(0).toLowerCase() + areaType.slice(1);
+                    }
+                }
+                
+                // 执行渲染
+                if (courtType && areaType) {
+                    renderArea(courtType, areaType, color);
                 }
             });
         });
@@ -1028,16 +1315,30 @@
                 // 更新当前激活区域
                 currentActiveArea = areaKey;
 
-                // 解析场地类型和区域类型并渲染
+                // 解析场地类型和区域类型并渲染 - 修复核心逻辑
+                let courtType, areaType;
                 if (areaKey.startsWith('pickle')) {
-                    const areaType = areaKey.replace('pickle', '').toLowerCase();
-                    renderArea('pickle', areaType, color);
+                    courtType = 'pickle';
+                    areaType = areaKey.replace('pickle', '').toLowerCase();
                 } else if (areaKey.startsWith('badminton')) {
-                    const areaType = areaKey.replace('badminton', '').toLowerCase();
-                    renderArea('badminton', areaType, color);
+                    courtType = 'badminton';
+                    areaType = areaKey.replace('badminton', '').toLowerCase();
                 } else if (areaKey.startsWith('pingpong')) {
-                    const areaType = areaKey.replace('pingpong', '').toLowerCase();
-                    renderArea('pingpong', areaType, color);
+                    courtType = 'pingpong';
+                    areaType = areaKey.replace('pingpong', '').toLowerCase();
+                } else if (areaKey.startsWith('basketball')) {
+                    courtType = 'basketball';
+                    // 修复：处理大小写和命名匹配问题
+                    areaType = areaKey.replace('basketball', '');
+                    // 将首字母小写，处理ThreePoint -> threePoint的情况
+                    if (areaType.length > 0) {
+                        areaType = areaType.charAt(0).toLowerCase() + areaType.slice(1);
+                    }
+                }
+                
+                // 执行渲染
+                if (courtType && areaType) {
+                    renderArea(courtType, areaType, color);
                 }
             });
         });
@@ -1065,7 +1366,9 @@
             function resizeCanvas() {
                 [pickleLeftCanvas, pickleRightCanvas, pickleBufferCanvas,
                  badmintonLeftCanvas, badmintonRightCanvas,
-                 pingpongFloorCanvas, pingpongTableCanvas].forEach(canvas => {
+                 pingpongFloorCanvas, pingpongTableCanvas,
+                 basketballBufferCanvas, basketballHomeCanvas, basketballForbiddenCanvas,
+                 basketballThreePointCanvas, basketballSemicircleCanvas, basketballCenterCircleCanvas].forEach(canvas => { // 新增：三个篮球Canvas
                     canvas.style.width = '100%';
                     canvas.style.height = '100%';
                 });
